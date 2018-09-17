@@ -134,8 +134,10 @@ singleSheetFiles n cells pivFileDatas ws tblIdRef = do
         mergeE1 r = leafElement "mergeCell" [("ref" .= r)]
         dimensionE r = leafElement "dimension" [("ref" .= r)]
         cellExtent =
-          let keysL = wsCells . to M.keys . traverse
-           in mkRange <$> minimumOf keysL ws <*> maximumOf keysL ws
+          let cells' = ws^.wsCells
+              -- this could use lookupMin/Max from containers 0.5.9, if we lift the required version
+              -- eg. mkRange <$> fmap fst (M.lookupMin cells') <*> fmap fst (M.lookupMax cells')
+           in if M.null cells' then Nothing else Just (mkRange (fst . M.findMin $ cells') (fst . M.findMax $ cells'))
 
         sheetRels = if null referencedFiles
                     then []
@@ -613,7 +615,6 @@ nm ns n = Name
 
 nEl :: Name -> Map Name Text -> [Node] -> Node
 nEl name attrs nodes = NodeElement $ Element name attrs nodes
-
 -- | Creates element holding reference to some linked file
 refElement :: Name -> RefId -> Element
 refElement name rId = leafElement name [ odr "id" .= rId ]

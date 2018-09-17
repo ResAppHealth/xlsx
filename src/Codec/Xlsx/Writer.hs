@@ -17,7 +17,7 @@ import Control.Monad.State (evalState, get, put)
 import qualified Data.ByteString.Lazy as L
 import Data.ByteString.Lazy.Char8 ()
 import Data.List (foldl', mapAccumL)
-import Data.Map (Map, keys)
+import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Maybe
 import Data.Monoid ((<>))
@@ -134,7 +134,7 @@ singleSheetFiles n cells pivFileDatas ws tblIdRef = do
         mergeE1 r = leafElement "mergeCell" [("ref" .= r)]
         dimensionE r = leafElement "dimension" [("ref" .= r)]
         cellExtent =
-          let keysL = wsCells . to keys . traverse
+          let keysL = wsCells . to M.keys . traverse
            in mkRange <$> minimumOf keysL ws <*> maximumOf keysL ws
 
         sheetRels = if null referencedFiles
